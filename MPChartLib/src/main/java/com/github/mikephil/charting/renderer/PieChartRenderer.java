@@ -494,6 +494,9 @@ public class PieChartRenderer extends DataRenderer {
 
                 angle = angle + angleOffset;
 
+                final float minimumSliceSize = 0.15f * 360.0f;
+                final int entryThresholdForHiding = 2;
+
                 final float transformedAngle = rotationAngle + angle * phaseY;
 
                 float value = mChart.isUsePercentValuesEnabled() ? entry.getY()
@@ -513,7 +516,7 @@ public class PieChartRenderer extends DataRenderer {
                 final boolean drawYInside = drawValues &&
                         yValuePosition == PieDataSet.ValuePosition.INSIDE_SLICE;
 
-                if (drawXOutside || drawYOutside) {
+                if ((drawXOutside || drawYOutside) && !(sliceAngle <= minimumSliceSize && entryCount > entryThresholdForHiding)) {
 
                     final float valueLineLength1 = dataSet.getValueLinePart1Length();
                     final float valueLineLength2 = dataSet.getValueLinePart2Length();
@@ -857,7 +860,11 @@ public class PieChartRenderer extends DataRenderer {
 
             final boolean accountForSliceSpacing = sliceSpace > 0.f && sliceAngle <= 180.f;
 
-            mRenderPaint.setColor(set.getColor(index));
+            if (mChart.useCustomHighLightColor()) {
+                mRenderPaint.setColor(set.getCustomHighlightColor());
+            } else {
+                mRenderPaint.setColor(set.getColor(index));
+            }
 
             final float sliceSpaceAngleOuter = visibleAngleCount == 1 ?
                     0.f :
